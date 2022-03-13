@@ -5,28 +5,15 @@ import (
 )
 
 func TestData_Simple(t *testing.T) {
-	data := NewData(0)
-	if data.GetValue() != 0 {
-		t.Error("data.GetValue() != 0")
+	value0 := int(0)
+	data := NewData(&value0)
+	if *data.GetValue() != 0 {
+		t.Error("*data.GetValue() != 0")
 	}
 
-	data.SetValue(1)
-	if data.GetValue() != 1 {
-		t.Error("data.GetValue() != 1")
-	}
-
-	value := 2
-	data.SetValuePtr(&value)
-	if data.GetValue() != 2 {
-		t.Error("data.GetValue() != 2")
-	}
-	valuePtr := data.GetValuePtr()
-	if valuePtr != &value {
-		t.Error("valuePtr != &value")
-	}
-
-	data = &Data[int]{(*int)(nil)}
-	if data.GetValue() != 0 {
-		t.Error("data.GetValue() != 0")
+	value1 := int(1)
+	data.SetValue(&value1)
+	if *data.GetValue() != 1 {
+		t.Error("*data.GetValue() != 1")
 	}
 }

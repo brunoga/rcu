@@ -12,35 +12,26 @@ type Data[T any] struct {
 }
 
 // NewData returns a new Data[T] associated with the given value.
-func NewData[T any](value T) *Data[T] {
-	return &Data[T]{value: &value}
+func NewData[T any](value *T) Data[T] {
+	return Data[T]{value: value}
 }
 
-// SetValue sets the value associated with Data[T] to the given one.
-func (d *Data[T]) SetValue(value T) {
-	d.SetValuePtr(&value)
-}
-
-// SetValuePtr sets the value pointer associated with Data[T] to the given one.
-func (d *Data[T]) SetValuePtr(valuePtr *T) {
+// SetValue sets the value pointer associated with Data[T] to the given one.
+func (d *Data[T]) SetValue(value *T) {
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&d.value)),
-		unsafe.Pointer(valuePtr))
+		unsafe.Pointer(value))
 }
 
-// GetValue returns the current value associated with Data[T]. It the internal
-// value pointer is nil, returns the zero value of T.
-func (d *Data[T]) GetValue() T {
-	valuePtr := d.GetValuePtr()
-	if valuePtr == nil {
-		var value T
-		return value
-	}
-
-	return *valuePtr
+// SetIfNilValue sets the value pointer associated with Data[T] to the given
+// value iff the current value pointer is nil. Returns true if the value was
+// set and false otherwise.
+func (d *Data[T]) SetIfNilValue(value *T) bool {
+	return atomic.CompareAndSwapPointer((*unsafe.Pointer)(unsafe.Pointer(&d.value)),
+		unsafe.Pointer(nil), unsafe.Pointer(value))
 }
 
-// GetValuePtr returns the current value pointer associated with Data[T].
-func (d *Data[T]) GetValuePtr() *T {
+// GetValue returns the current value pointer associated with Data[T].
+func (d *Data[T]) GetValue() *T {
 	return (*T)(atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(
 		&d.value))))
 }
